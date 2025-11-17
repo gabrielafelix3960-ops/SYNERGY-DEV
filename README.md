@@ -1,3 +1,83 @@
+SYNERGY DEV — Marketing Total IA
+Descrição
+SYNERGY DEV é uma landing page e demo de plataforma que demonstra uma solução de Marketing e Vendas movida a Inteligência Artificial para PMEs e criadores de software. Esta versão é uma implementação front-end (HTML/CSS/JS) com um dashboard demonstrativo e simulações de onboarding, checkout e acesso antecipado (patrocinadores).
+
+Funcionalidades principais
+Landing page responsiva com secções: Hero, Onboarding, Pricing, Early Access e Dashboard de demonstração.
+Formulário de onboarding para recolha de dados da empresa (simulado).
+Simulação de checkout Stripe (cliente) — em produção requer integração servidor-side com Stripe Secret Key.
+Acesso antecipado para patrocinadores (simulado).
+Interface escura com gradientes e estilo moderno (Tailwind CSS via CDN).
+Componentes e sugestões para integração de imagens (logo, banner, favicon).
+Estado do projecto
+Versão: Demo / MVP front-end
+Backend/produção: Não incluído. Recomenda-se implementar endpoints seguros para:
+Criação de Stripe Checkout Sessions (server-side)
+Persistência de onboarding (Firestore/Postgres/etc.)
+Autenticação e gestão de utilizadores
+Estrutura de ficheiros sugerida
+index.html — Página principal (landing + demo)
+assets/
+images/ — logo, banner, favicon, etc.
+css/ — CSS adicional (opcional)
+js/ — scripts separados (opcional)
+README.md
+.gitignore
+Instalação e execução local
+Clone o repositório:
+git clone git@github.com:SEU_USUARIO/NOME_REPO.git
+cd NOME_REPO
+
+Abrir localmente:
+
+Método simples: abrir index.html no navegador.
+Recomendado: servir com um servidor local para evitar problemas de CORS/paths:
+Com Python 3:
+python -m http.server 8000
+e abra http://localhost:8000
+Ou com um servidor estático npm:
+npx serve .
+Integração com Stripe (nota importante)
+Na demo, o checkout é simulado. Para pagamentos reais:
+Crie um backend seguro (Node/Express, Python, etc.).
+Instale e configure a Stripe SDK no servidor e armazene a STRIPE_SECRET_KEY em variáveis de ambiente (não comitar).
+Crie endpoint que gera uma Checkout Session e devolve sessionId.
+No frontend, chame o endpoint e faça stripe.redirectToCheckout({ sessionId }).
+Nunca exponha a Stripe Secret Key no frontend ou num repositório público.
+Deploy
+Opções recomendadas:
+
+GitHub Pages (apenas para site estático):
+Settings → Pages → Source = branch main / folder = /root.
+Vercel (recomendado para estático + serverless):
+Conecte o repositório ao Vercel para deploy automático.
+Defina Environment Variables no painel do projeto para segredos (ex.: STRIPE_SECRET_KEY).
+Netlify:
+Conectar repositório e definir build settings caso necessário.
+Observação: se precisar de endpoints serverless (ex.: criação de Checkout Session), use Vercel Functions, Netlify Functions ou um pequeno servidor separado (Heroku, Render, DigitalOcean App Platform).
+Boas práticas e segurança
+Não comitar chaves/credentials (.env) no repositório.
+Validar e sanitizar todos os inputs no servidor.
+Usar HTTPS em produção.
+Implementar rate limiting e protecções anti-abuso em endpoints públicos.
+Minimizar e otimizar as imagens (WebP, srcset) e usar caching (Cache-Control).
+Se usar Tailwind em produção, configurar um pipeline de build para purgar classes não utilizadas.
+Assets e imagens
+Coloque logos e banners em /assets/images/.
+Formatos recomendados: SVG para logo (vetorial), PNG/WebP para banners.
+Fornecer variantes para retina (1x/2x) e tamanhos responsivos para o banner.
+Contribuição
+Pull requests são bem-vindos. Antes de submeter:
+
+Teste o funcionamento localmente.
+Mantenha commits pequenos e descritivos.
+Abra issues para discutir features maiores (backend, autenticação, integrações).
+Licença
+Defina a licença que preferir (ex.: MIT). Se ainda não tiver decidido, pode adicionar um ficheiro LICENSE com o texto MIT.
+
+Contactos
+Email: felixepessanha@gmail.com
+Telefone: +351 916657774
 Patrocine a Próxima Onda de Inovação: Marketing 100% IA para Criadores e Empreendedores.
 
 🎯 A Minha Missão (O que o Patrocinador está a Apoiar)
