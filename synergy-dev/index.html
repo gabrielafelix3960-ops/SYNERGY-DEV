@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERGY DEV | Marketing Total IA</title>
+    <!-- Carregar Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carregar Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        /* Configurações visuais gerais e fontes */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Cor de fundo escura */
+        }
+        /* Efeito de gradiente para a marca */
+        .synergy-gradient {
+            background-image: linear-gradient(90deg, #10b981, #3b82f6, #9333ea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        /* Estilo da barra de progresso (para simulação de acesso) */
+        #loading-bar {
+            height: 4px;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen">
+
+    <!-- Variáveis de Configuração do Projeto -->
+    <script>
+        // Informações de Contato
+        const CONTACT_EMAIL = 'felixepessanha@gmail.com';
+        const CONTACT_PHONE = '+351 916657774';
+        
+        // Configuração Stripe (Chaves de Teste)
+        // A chave secreta (sk_test_...) seria usada num servidor, mas é apenas um placeholder aqui.
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SPl5b00iKGjvRsicchIY3GUlZgMYdCA78cYchz6U9DO7VXeD5DFcw0W1nCc7JS8X9mfFwnnJTgbQDYehjYjPMjj00UbiXdg5H';
+        
+        // Configuração dos Preços
+        const ANNUAL_PRICE_EUROS = 449; // Preço para o cliente final (€/ano)
+        const SPONSOR_PRICE_MONTH = 25; // Preço para patrocinadores (€/mês)
+        
+        // Inicialização do Stripe
+        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+        /**
+         * Funções de UI para mensagens e loading
+         */
+        function showLoading(message) {
+            const loader = document.getElementById('loader');
+            const loadingBar = document.getElementById('loading-bar');
+            document.getElementById('loader-message').textContent = message;
+            loader.classList.remove('hidden');
+            loadingBar.style.width = '100%'; 
+        }
+
+        function hideLoading() {
+            const loader = document.getElementById('loader');
+            const loadingBar = document.getElementById('loading-bar');
+            loader.classList.add('hidden');
+            loadingBar.style.width = '0%';
+            document.getElementById('loader-message').textContent = '';
+        }
+
+        function showMessage(message, type = 'info') {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'bg-blue-500');
+            
+            if (type === 'success') messageBox.classList.add('bg-green-500');
+            else if (type === 'error') messageBox.classList.add('bg-red-500');
+            else messageBox.classList.add('bg-blue-500');
+
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        /**
+         * Simula o processo de checkout anual do cliente final (449€/ano).
+         * @param {number} amountInEuros - O valor total em euros.
+         */
+        async function initiateStripeCheckout(amountInEuros) {
+            // Em ambiente real, esta chamada criaria uma Stripe Session no lado do servidor.
+            
+            showLoading("A iniciar checkout...");
+
+            try {
+                console.log(`Simulação de Checkout para: ${amountInEuros}€/ano`);
+                
+                setTimeout(() => {
+                    hideLoading();
+                    showMessage(`Checkout iniciado com sucesso (Simulação). Seria redirecionado(a) para a Stripe para pagar ${amountInEuros}€/ano.`, 'success');
+                }, 2000);
+
+            } catch (error) {
+                hideLoading();
+                showMessage('Erro ao iniciar o checkout. Por favor, tente novamente.', 'error');
+                console.error('Erro de simulação de Stripe:', error);
+            }
+        }
+
+        /**
+         * Simula o login do patrocinador (Early Access 25€/mês).
+         */
+        function sponsorLogin() {
+            const sponsorEmail = document.getElementById('sponsor-email').value;
+
+            if (!sponsorEmail.includes('@') || sponsorEmail.length < 5) {
+                showMessage('Por favor, insira um endereço de email válido.', 'error');
+                return;
+            }
+
+            showLoading("A verificar o estatuto de patrocinador...");
+            
+            setTimeout(() => {
+                hideLoading();
+                showMessage(`Acesso Antecipado concedido para: ${sponsorEmail}. Bem-vindo(a) à SYNERGY DEV!`, 'success');
+                document.getElementById('marketing-page').classList.add('hidden');
+                document.getElementById('app-dashboard').classList.remove('hidden');
+            }, 3000);
+        }
+        
+        /**
+         * Simula o início do processo de Onboarding e Análise de Dados da Empresa.
+         */
+        function startOnboarding() {
+            const companyName = document.getElementById('company-name').value.trim();
+            const companySector = document.getElementById('company-sector').value.trim();
+            const websiteUrl = document.getElementById('website-url').value.trim();
+            const whatsappNumber = document.getElementById('whatsapp-number').value.trim();
+            const socialMediaUrls = document.getElementById('social-media-urls').value.trim();
+            const createSocialMedia = document.getElementById('create-social-media').checked;
+            const challenge = document.getElementById('current-challenge').value.trim();
+
+            if (!companyName || !companySector || !challenge) {
+                showMessage('Por favor, preencha o Nome, Setor e Desafio. Os campos de URL são opcionais.', 'error');
+                return;
+            }
+
+            let analysisMessage = `A SYNERGY DEV está a analisar os dados de ${companyName} (Setor: ${companySector})...`;
+            
+            if (createSocialMedia) {
+                analysisMessage += ` A IA está a preparar uma estratégia completa de SEO, Redes Sociais e WhatsApp para integração.`;
+            } else {
+                analysisMessage += ` A IA está a integrar o Site e as Redes sociais existentes para o plano de ação.`;
+            }
+
+            showLoading(analysisMessage);
+            
+            // Em um sistema real, todos estes dados seriam enviados para o servidor/Firestore para serem analisados pela IA.
+
+            setTimeout(() => {
+                hideLoading();
+                showMessage(`Análise Preliminar Concluída para ${companyName}! Veja as opções de preço abaixo para aceder ao plano completo.`, 'success');
+                // Redirecionamos o utilizador para a secção de preços.
+                window.location.href = '#pricing';
+            }, 4000);
+        }
+
+
+        // Lógica para alternar entre a página de marketing e o dashboard de demonstração
+        function logout() {
+            document.getElementById('app-dashboard').classList.add('hidden');
+            document.getElementById('marketing-page').classList.remove('hidden');
+            showMessage('Sessão terminada.', 'info');
+        }
+
+        // Função de inicialização para definir valores dinâmicos de UI (como o email no dashboard)
+        function initializeUI() {
+            // Define o email de contato no dashboard
+            const dashboardEmailSpan = document.getElementById('dashboard-contact-email');
+            if (dashboardEmailSpan) {
+                dashboardEmailSpan.textContent = CONTACT_EMAIL;
+            }
+        }
+        
+        // Chamamos a função de inicialização assim que o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', initializeUI);
+    </script>
+
+    <!-- Barra de Mensagem e Loading (Substitui o alert()) -->
+    <div id="message-box" class="fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-xl text-center z-50 hidden text-white font-medium transition duration-300"></div>
+    
+    <div id="loader" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 hidden">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl w-80">
+            <p id="loader-message" class="text-sm font-semibold text-white mb-2"></p>
+            <div class="w-full bg-gray-700 rounded-full overflow-hidden">
+                <div id="loading-bar" class="rounded-full"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Conteúdo da Página de Marketing (Visível por Padrão) -->
+    <div id="marketing-page">
+        
+        <!-- Navbar -->
+        <header class="p-6 border-b border-gray-700 flex justify-between items-center">
+            <!-- Logo SYNERGY DEV.jpg. -->
+            <!-- Caminho corrigido para assets/SYNERGY DEV.jpg -->
+            <img src="assets/SYNERGY DEV.jpg" onerror="this.onerror=null;this.src='https://placehold.co/150x40/0d1117/fff?text=SYNERGY+DEV+Logo'" alt="SYNERGY DEV Logo" class="h-10">
+            <nav>
+                <a href="#onboarding" class="text-sm font-medium text-gray-300 hover:text-white transition duration-200 p-3 rounded-lg hover:bg-gray-800">Início Rápido</a>
+                <a href="#early-access" class="text-sm font-medium text-gray-300 hover:text-white transition duration-200 p-3 rounded-lg hover:bg-gray-800 ml-4">Patrocinadores</a>
+                <a href="#pricing" class="text-sm font-medium text-gray-300 hover:text-white transition duration-200 p-3 rounded-lg hover:bg-gray-800 ml-4">Preço</a>
+            </nav>
+        </header>
+
+        <!-- Secção Principal - Apresentação do Produto com Banner de Fundo -->
+        <section class="container mx-auto px-6 py-20 text-center relative overflow-hidden rounded-xl my-10">
+            <!-- Banner de Fundo (SYNERGY DEV Marketin.jpg). -->
+            <!-- Caminho corrigido para assets/SYNERGY DEV Marketin.jpg -->
+            <div class="absolute inset-0 z-0 opacity-10 bg-cover bg-center rounded-xl" 
+                 style="background-image: url('assets/SYNERGY DEV Marketin.jpg');"
+                 onerror="this.style.backgroundImage='url(https://placehold.co/1200x600/0d1117/fff?text=SYNERGY+DEV+Banner)'">
+            </div>
+
+            <div class="relative z-10">
+                <h2 class="text-6xl md:text-8xl font-black mb-6 leading-tight synergy-gradient">
+                    Marketing <span class="text-white">Total</span> IA
+                </h2>
+                <p class="text-xl text-gray-400 max-w-4xl mx-auto mb-12">
+                    SYNERGY DEV é a plataforma revolucionária que utiliza Inteligência Artificial para libertar criadores de software e PMEs da complexidade da divulgação. **Foque 100% no seu projeto, nós garantimos o sucesso de vendas.**
+                </p>
+                <a href="#onboarding" class="px-10 py-4 bg-blue-600 text-white font-bold text-lg rounded-xl shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+                    Começar Agora
+                </a>
+                <div class="mt-20">
+                    <!-- Imagem Placeholder do Dashboard -->
+                    <div class="bg-gray-800 rounded-2xl p-4 shadow-2xl border border-gray-700 max-w-6xl mx-auto">
+                        <div class="h-8 bg-gray-700 rounded-lg flex items-center px-4">
+                            <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                            <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
+                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                            <span class="ml-4 text-xs text-gray-400">SYNERGY DEV Dashboard - Análise e Automação</span>
+                        </div>
+                        <div class="h-96 w-full mt-4 bg-gray-900 rounded-xl flex items-center justify-center text-gray-600 text-sm italic">
+                            [Visão geral do Painel de IA em funcionamento: Gráficos de Crescimento, Análise de Público-alvo e sugestões de conteúdo geradas por IA.]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Secção de Onboarding/Input de Dados da Empresa - AGORA COM DADOS COMPLETOS E OPÇÕES DE INTEGRAÇÃO -->
+        <section id="onboarding" class="container mx-auto px-6 py-20 text-center max-w-4xl">
+            <h3 class="text-4xl font-extrabold mb-4 text-white">
+                Início Rápido: Dados para a IA
+            </h3>
+            <p class="text-gray-400 mb-8">
+                Para que a SYNERGY DEV possa gerar o seu plano de vendas e marketing, precisamos de algumas informações essenciais sobre o seu negócio e a sua presença online.
+            </p>
+
+            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700 text-left">
+                <div class="space-y-4">
+                    <!-- Informações Básicas -->
+                    <div>
+                        <label for="company-name" class="block text-sm font-medium text-gray-300 mb-1">Nome da Empresa / Projeto</label>
+                        <input type="text" id="company-name" placeholder="Ex: M&S Mãos à Obra" 
+                               class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                    </div>
+                    <div>
+                        <label for="company-sector" class="block text-sm font-medium text-gray-300 mb-1">Setor de Atuação</label>
+                        <input type="text" id="company-sector" placeholder="Ex: Construção Civil, Desenvolvimento de Software" 
+                               class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                    </div>
+
+                    <!-- Conectividade Digital -->
+                    <h4 class="text-lg font-semibold text-white pt-4 border-t border-gray-700 mt-4">Conectividade Digital e Automação</h4>
+                    
+                    <div>
+                        <label for="website-url" class="block text-sm font-medium text-gray-300 mb-1">Site Principal (URL) - Opcional</label>
+                        <input type="url" id="website-url" placeholder="Ex: https://www.meusite.pt" 
+                               class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                    </div>
+                    <div>
+                        <label for="whatsapp-number" class="block text-sm font-medium text-gray-300 mb-1">Número de WhatsApp (para Automação de Leads)</label>
+                        <input type="tel" id="whatsapp-number" placeholder="Ex: +351 912345678" 
+                               class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="social-media-urls" class="block text-sm font-medium text-gray-300 mb-1">Links de Redes Sociais Existentes (1 por linha) - Opcional</label>
+                        <textarea id="social-media-urls" rows="4" placeholder="Ex:
+https://facebook.com/minhaempresa
+https://instagram.com/minhaempresa
+https://linkedin.com/company/minhaempresa" 
+                                  class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    
+                    <!-- Opção de Criação de Redes Sociais (Serviço Adicional) -->
+                    <div class="flex items-start pt-4 border-t border-gray-700">
+                        <input id="create-social-media" type="checkbox" class="mt-1 h-4 w-4 text-purple-600 bg-gray-900 border-gray-700 rounded focus:ring-purple-500">
+                        <label for="create-social-media" class="ml-3 text-sm font-medium text-gray-300">
+                            **Não tenho presença digital completa.** Desejo o serviço de **Criação de Redes Sociais, SEO, Google Ads e Nicho** (Integração Total pela IA).
+                        </label>
+                    </div>
+                    
+                    <!-- Desafio Atual -->
+                    <div class="pt-4">
+                        <label for="current-challenge" class="block text-sm font-medium text-gray-300 mb-1">Principal Desafio de Marketing/Vendas Atual</label>
+                        <textarea id="current-challenge" rows="4" placeholder="Ex: Precisamos de mais leads qualificados na Margem Sul ou o meu software não tem visibilidade no exterior." 
+                                  class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+                
+                <button onclick="startOnboarding()" class="mt-8 w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+                    Analisar e Ver Planos
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-4">Os dados são processados pela IA para recomendação e não são guardados nesta demonstração.</p>
+        </section>
+
+
+        <!-- Secção de Preço (Pricing) -->
+        <section id="pricing" class="container mx-auto px-6 py-20 bg-gray-900 rounded-3xl shadow-inner my-16 max-w-6xl">
+            <h3 class="text-4xl font-extrabold text-center mb-12">A Subscrição que Liberta o Seu Tempo</h3>
+
+            <div class="flex justify-center">
+                <div class="bg-gray-800 border-2 border-blue-600 rounded-2xl shadow-xl p-8 max-w-md text-center transform hover:scale-[1.02] transition duration-300">
+                    <p class="text-sm font-semibold text-blue-400 mb-2 uppercase tracking-widest">Plano Profissional</p>
+                    <h4 class="text-5xl font-black text-white mb-4">
+                        <span class="text-2xl align-top text-gray-400">€</span>449
+                        <span class="text-xl font-normal text-gray-400">/ano</span>
+                    </h4>
+                    <p class="text-gray-400 mb-8">Acesso Ilimitado a todas as ferramentas de Marketing e Vendas movidas a IA.</p>
+                    
+                    <ul class="text-left space-y-3 mb-10 text-gray-300">
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Automação Total de Conteúdo & Leads</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Análise Preditiva de Mercado (Nicho/Google Ads)</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Integração Total (Sites, Redes e WhatsApp)</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Suporte Prioritário 24/7</li>
+                    </ul>
+
+                    <button onclick="initiateStripeCheckout(ANNUAL_PRICE_EUROS)" class="w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition duration-300">
+                        Comprar Agora (€449/ano)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Secção de Acesso Antecipado para Patrocinadores -->
+        <section id="early-access" class="container mx-auto px-6 py-20 text-center max-w-4xl">
+            <h3 class="text-4xl font-extrabold mb-4 text-white">
+                Acesso Antecipado <span class="synergy-gradient">(Patrocinadores)</span>
+            </h3>
+            <p class="text-gray-400 mb-8">
+                É um patrocinador ativo com a modalidade de **€25/mês**? Agradecemos o seu apoio! Insira o seu email de patrocínio para aceder à versão Alpha/Beta do SYNERGY DEV.
+            </p>
+
+            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
+                <input type="email" id="sponsor-email" placeholder="O seu email de Patrocínio (ex: gabriela.felix3960@gmail.com)" 
+                       class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                       value="felixepessanha@gmail.com"
+                >
+                <button onclick="sponsorLogin()" class="w-full px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition duration-300">
+                    Entrar no Acesso Antecipado
+                </button>
+            </div>
+        </section>
+
+        <!-- Footer com Informações de Contato -->
+        <footer class="mt-20 border-t border-gray-800 p-6 text-center text-gray-500">
+            <p>&copy; 2025 SYNERGY DEV - Todos os direitos reservados.</p>
+            <p class="mt-2 text-sm">
+                Contacto: <a href="mailto:${CONTACT_EMAIL}" class="hover:text-white">${CONTACT_EMAIL}</a> | Telefone: ${CONTACT_PHONE} (PT)
+            </p>
+        </footer>
+    </div>
+
+
+    <!-- Dashboard de Demonstração (Visível Apenas Após Login/Acesso) -->
+    <div id="app-dashboard" class="hidden min-h-screen p-8">
+        
+        <header class="flex justify-between items-center pb-6 border-b border-gray-700">
+            <!-- Logo no Dashboard -->
+            <!-- Caminho corrigido para assets/SYNERGY DEV.jpg -->
+            <img src="assets/SYNERGY DEV.jpg" onerror="this.onerror=null;this.src='https://placehold.co/150x40/0d1117/fff?text=SYNERGY+DEV+Logo'" alt="SYNERGY DEV Logo" class="h-10">
+            <h2 class="text-4xl font-extrabold synergy-gradient"><span class="text-white text-base font-medium ml-2 border border-blue-500 px-3 py-1 rounded-full">Acesso Alpha</span></h2>
+            <button onclick="logout()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 transform hover:scale-105">
+                Sair / Logout
+            </button>
+        </header>
+
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Cartão 1: Análise Preditiva -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+                <h4 class="text-xl font-bold mb-3 text-blue-400">Análise Preditiva</h4>
+                <p class="text-gray-400 mb-4">A IA previu um aumento de 15% nas vendas para o seu produto Amigo Virtual no próximo trimestre. Foco em anúncios no LinkedIn.</p>
+                <a href="#" class="text-blue-500 hover:text-blue-400 text-sm font-semibold">Ver Relatório Completo &rarr;</a>
+            </div>
+
+            <!-- Cartão 2: Geração de Conteúdo -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+                <h4 class="text-xl font-bold mb-3 text-green-400">Geração de Conteúdo</h4>
+                <p class="text-gray-400 mb-4">Geração automática de 5 posts para Twitter e 3 scripts de vídeo otimizados para YouTube. Prontos para publicação.</p>
+                <a href="#" class="text-green-500 hover:text-green-400 text-sm font-semibold">Publicar Conteúdo &rarr;</a>
+            </div>
+
+            <!-- Cartão 3: Sinergia de Vendas -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+                <h4 class="text-xl font-bold mb-3 text-purple-400">Sinergia de Vendas</h4>
+                <p class="text-gray-400 mb-4">A plataforma identificou 4 PMEs com perfil de cliente ideal para a sua solução. Contacto automatizado iniciado.</p>
+                <a href="#" class="text-purple-500 hover:text-purple-400 text-sm font-semibold">Monitorizar Leads &rarr;</a>
+            </div>
+        </div>
+
+        <div class="mt-12 bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
+            <h4 class="text-2xl font-bold mb-4 text-white">Feedback e Testes Alpha</h4>
+            <p class="text-gray-400">Obrigado por ser um patrocinador e testador Alpha! Envie o seu feedback de erros ou sugestões para o nosso canal exclusivo no Discord ou para <span id="dashboard-contact-email"></span>.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>
