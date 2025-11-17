@@ -1,428 +1,527 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGY DEV | Marketing Total IA</title>
-    <!-- Carregar Tailwind CSS -->
+    <title>SYNERGY DEV | Plataforma de Marketing IA</title>
+    <!-- Incluir Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carregar Stripe.js -->
-    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4f46e5',
+                        'secondary': '#8b5cf6',
+                        'dark-bg': '#1e293b',
+                        'dark-card': '#334155',
+                        'accent': '#a78bfa',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    keyframes: {
+                        'pulse-glow': {
+                            '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 0 rgba(167, 139, 250, 0.4)' },
+                            '50%': { transform: 'scale(1.02)', boxShadow: '0 0 10px rgba(167, 139, 250, 0.8)' },
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulse-glow 2s infinite ease-in-out',
+                        'float': 'float 4s infinite ease-in-out',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Configurações visuais gerais e fontes */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        /* Estilos globais */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d1117; /* Cor de fundo escura */
+            background-color: #0f172a; /* Fundo escuro total */
+            color: #e2e8f0;
         }
-        /* Efeito de gradiente para a marca */
-        .synergy-gradient {
-            background-image: linear-gradient(90deg, #10b981, #3b82f6, #9333ea);
+
+        /* Classe para o fundo do Banner com a imagem corrigida */
+        .hero-background {
+            background-image: url('assets/SYNERGY-DEV-Marketin.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Efeito Parallax suave */
+            position: relative;
+        }
+
+        /* Máscara de sobreposição escura para o Banner */
+        .hero-background::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7); /* Transparência escura */
+            z-index: 10;
+        }
+
+        /* Garantir que o conteúdo fique por cima da máscara */
+        .hero-content {
+            position: relative;
+            z-index: 20;
+        }
+
+        /* Efeito de gradiente para textos destacados */
+        .gradient-text {
+            background-image: linear-gradient(to right, #a78bfa, #8b5cf6, #4f46e5);
             -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             background-clip: text;
-            color: transparent;
+            text-fill-color: transparent;
         }
-        /* Estilo da barra de progresso (para simulação de acesso) */
-        #loading-bar {
-            height: 4px;
-            background-color: #3b82f6;
-            width: 0%;
-            transition: width 0.5s ease-in-out;
+
+        /* Estilo para a Tabela de Preços */
+        .price-card-glow {
+            box-shadow: 0 4px 15px rgba(167, 139, 250, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .price-card-glow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(167, 139, 250, 0.4);
+        }
+
+        /* Estilo para animação de loading do Dashboard */
+        .dot-flashing {
+            position: relative;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #a78bfa;
+            color: #a78bfa;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 0s;
+        }
+
+        .dot-flashing::before, .dot-flashing::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            left: -15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #a78bfa;
+            color: #a78bfa;
+            animation: dotFlashing 1s infinite alternate;
+        }
+
+        .dot-flashing::before {
+            animation-delay: 0s;
+        }
+
+        .dot-flashing::after {
+            left: 15px;
+            animation-delay: 0.2s;
+        }
+
+        @keyframes dotFlashing {
+            0% {
+                background-color: #a78bfa;
+            }
+            50%, 100% {
+                background-color: #8b5cf6;
+            }
         }
     </style>
 </head>
-<body class="text-white min-h-screen">
+<body class="min-h-screen">
 
-    <!-- Variáveis de Configuração do Projeto -->
-    <script>
-        // Informações de Contato
-        const CONTACT_EMAIL = 'felixepessanha@gmail.com';
-        const CONTACT_PHONE = '+351 916657774';
-        
-        // Configuração Stripe (Chaves de Teste)
-        // A chave secreta (sk_test_...) seria usada num servidor, mas é apenas um placeholder aqui.
-        const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SPl5b00iKGjvRsicchIY3GUlZgMYdCA78cYchz6U9DO7VXeD5DFcw0W1nCc7JS8X9mfFwnnJTgbQDYehjYjPMjj00UbiXdg5H';
-        
-        // Configuração dos Preços
-        const ANNUAL_PRICE_EUROS = 449; // Preço para o cliente final (€/ano)
-        const SPONSOR_PRICE_MONTH = 25; // Preço para patrocinadores (€/mês)
-        
-        // Inicialização do Stripe
-        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+    <!-- Estrutura Principal -->
+    <div id="app">
 
-        /**
-         * Funções de UI para mensagens e loading
-         */
-        function showLoading(message) {
-            const loader = document.getElementById('loader');
-            const loadingBar = document.getElementById('loading-bar');
-            document.getElementById('loader-message').textContent = message;
-            loader.classList.remove('hidden');
-            loadingBar.style.width = '100%'; 
-        }
+        <!-- 1. Navegação Principal -->
+        <nav class="sticky top-0 z-50 bg-dark-bg/95 backdrop-blur-sm shadow-lg border-b border-primary/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo (corrigido o caminho para o ficheiro sem espaços) -->
+                    <div class="flex-shrink-0 flex items-center">
+                        <img class="h-8 w-auto animate-float" src="assets/SYNERGY-DEV.jpg" alt="SYNERGY DEV Logo">
+                        <span class="ml-3 text-xl font-extrabold gradient-text">SYNERGY DEV</span>
+                    </div>
 
-        function hideLoading() {
-            const loader = document.getElementById('loader');
-            const loadingBar = document.getElementById('loading-bar');
-            loader.classList.add('hidden');
-            loadingBar.style.width = '0%';
-            document.getElementById('loader-message').textContent = '';
-        }
-
-        function showMessage(message, type = 'info') {
-            const messageBox = document.getElementById('message-box');
-            messageBox.textContent = message;
-            messageBox.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'bg-blue-500');
-            
-            if (type === 'success') messageBox.classList.add('bg-green-500');
-            else if (type === 'error') messageBox.classList.add('bg-red-500');
-            else messageBox.classList.add('bg-blue-500');
-
-            setTimeout(() => {
-                messageBox.classList.add('hidden');
-            }, 5000);
-        }
-
-        /**
-         * Simula o processo de checkout anual do cliente final (449€/ano).
-         * @param {number} amountInEuros - O valor total em euros.
-         */
-        async function initiateStripeCheckout(amountInEuros) {
-            // Em ambiente real, esta chamada criaria uma Stripe Session no lado do servidor.
-            
-            showLoading("A iniciar checkout...");
-
-            try {
-                console.log(`Simulação de Checkout para: ${amountInEuros}€/ano`);
-                
-                setTimeout(() => {
-                    hideLoading();
-                    showMessage(`Checkout iniciado com sucesso (Simulação). Seria redirecionado(a) para a Stripe para pagar ${amountInEuros}€/ano.`, 'success');
-                }, 2000);
-
-            } catch (error) {
-                hideLoading();
-                showMessage('Erro ao iniciar o checkout. Por favor, tente novamente.', 'error');
-                console.error('Erro de simulação de Stripe:', error);
-            }
-        }
-
-        /**
-         * Simula o login do patrocinador (Early Access 25€/mês).
-         */
-        function sponsorLogin() {
-            const sponsorEmail = document.getElementById('sponsor-email').value;
-
-            if (!sponsorEmail.includes('@') || sponsorEmail.length < 5) {
-                showMessage('Por favor, insira um endereço de email válido.', 'error');
-                return;
-            }
-
-            showLoading("A verificar o estatuto de patrocinador...");
-            
-            setTimeout(() => {
-                hideLoading();
-                showMessage(`Acesso Antecipado concedido para: ${sponsorEmail}. Bem-vindo(a) à SYNERGY DEV!`, 'success');
-                document.getElementById('marketing-page').classList.add('hidden');
-                document.getElementById('app-dashboard').classList.remove('hidden');
-            }, 3000);
-        }
-        
-        /**
-         * Simula o início do processo de Onboarding e Análise de Dados da Empresa.
-         */
-        function startOnboarding() {
-            const companyName = document.getElementById('company-name').value.trim();
-            const companySector = document.getElementById('company-sector').value.trim();
-            const websiteUrl = document.getElementById('website-url').value.trim();
-            const whatsappNumber = document.getElementById('whatsapp-number').value.trim();
-            const socialMediaUrls = document.getElementById('social-media-urls').value.trim();
-            const createSocialMedia = document.getElementById('create-social-media').checked;
-            const challenge = document.getElementById('current-challenge').value.trim();
-
-            if (!companyName || !companySector || !challenge) {
-                showMessage('Por favor, preencha o Nome, Setor e Desafio. Os campos de URL são opcionais.', 'error');
-                return;
-            }
-
-            let analysisMessage = `A SYNERGY DEV está a analisar os dados de ${companyName} (Setor: ${companySector})...`;
-            
-            if (createSocialMedia) {
-                analysisMessage += ` A IA está a preparar uma estratégia completa de SEO, Redes Sociais e WhatsApp para integração.`;
-            } else {
-                analysisMessage += ` A IA está a integrar o Site e as Redes sociais existentes para o plano de ação.`;
-            }
-
-            showLoading(analysisMessage);
-            
-            // Em um sistema real, todos estes dados seriam enviados para o servidor/Firestore para serem analisados pela IA.
-
-            setTimeout(() => {
-                hideLoading();
-                showMessage(`Análise Preliminar Concluída para ${companyName}! Veja as opções de preço abaixo para aceder ao plano completo.`, 'success');
-                // Redirecionamos o utilizador para a secção de preços.
-                window.location.href = '#pricing';
-            }, 4000);
-        }
-
-
-        // Lógica para alternar entre a página de marketing e o dashboard de demonstração
-        function logout() {
-            document.getElementById('app-dashboard').classList.add('hidden');
-            document.getElementById('marketing-page').classList.remove('hidden');
-            showMessage('Sessão terminada.', 'info');
-        }
-
-        // Função de inicialização para definir valores dinâmicos de UI (como o email no dashboard)
-        function initializeUI() {
-            // Define o email de contato no dashboard
-            const dashboardEmailSpan = document.getElementById('dashboard-contact-email');
-            if (dashboardEmailSpan) {
-                dashboardEmailSpan.textContent = CONTACT_EMAIL;
-            }
-        }
-        
-        // Chamamos a função de inicialização assim que o DOM estiver pronto
-        document.addEventListener('DOMContentLoaded', initializeUI);
-    </script>
-
-    <!-- Barra de Mensagem e Loading (Substitui o alert()) -->
-    <div id="message-box" class="fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-xl text-center z-50 hidden text-white font-medium transition duration-300"></div>
-    
-    <div id="loader" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 hidden">
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl w-80">
-            <p id="loader-message" class="text-sm font-semibold text-white mb-2"></p>
-            <div class="w-full bg-gray-700 rounded-full overflow-hidden">
-                <div id="loading-bar" class="rounded-full"></div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Conteúdo da Página de Marketing (Visível por Padrão) -->
-    <div id="marketing-page">
-        
-        <!-- Navbar -->
-        <header class="p-6 border-b border-gray-700 flex justify-between items-center">
-            <!-- Logo SYNERGY DEV.jpg. -->
-            <!-- Caminho corrigido para assets/SYNERGY DEV.jpg -->
-            <img src="assets/SYNERGY DEV.jpg" onerror="this.onerror=null;this.src='https://placehold.co/150x40/0d1117/fff?text=SYNERGY+DEV+Logo'" alt="SYNERGY DEV Logo" class="h-10">
-            <nav>
-                <a href="#onboarding" class="text-sm font-medium text-gray-300 hover:text-white transition duration-200 p-3 rounded-lg hover:bg-gray-800">Início Rápido</a>
-                <a href="#early-access" class="text-sm font-medium text-gray-300 hover:text-white transition duration-200 p-3 rounded-lg hover:bg-gray-800 ml-4">Patrocinadores</a>
-                <a href="#pricing" class="text-sm font-medium text-gray-300 hover:text-white transition duration-200 p-3 rounded-lg hover:bg-gray-800 ml-4">Preço</a>
-            </nav>
-        </header>
-
-        <!-- Secção Principal - Apresentação do Produto com Banner de Fundo -->
-        <section class="container mx-auto px-6 py-20 text-center relative overflow-hidden rounded-xl my-10">
-            <!-- Banner de Fundo (SYNERGY DEV Marketin.jpg). -->
-            <!-- Caminho corrigido para assets/SYNERGY DEV Marketin.jpg -->
-            <div class="absolute inset-0 z-0 opacity-10 bg-cover bg-center rounded-xl" 
-                 style="background-image: url('assets/SYNERGY DEV Marketin.jpg');"
-                 onerror="this.style.backgroundImage='url(https://placehold.co/1200x600/0d1117/fff?text=SYNERGY+DEV+Banner)'">
-            </div>
-
-            <div class="relative z-10">
-                <h2 class="text-6xl md:text-8xl font-black mb-6 leading-tight synergy-gradient">
-                    Marketing <span class="text-white">Total</span> IA
-                </h2>
-                <p class="text-xl text-gray-400 max-w-4xl mx-auto mb-12">
-                    SYNERGY DEV é a plataforma revolucionária que utiliza Inteligência Artificial para libertar criadores de software e PMEs da complexidade da divulgação. **Foque 100% no seu projeto, nós garantimos o sucesso de vendas.**
-                </p>
-                <a href="#onboarding" class="px-10 py-4 bg-blue-600 text-white font-bold text-lg rounded-xl shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">
-                    Começar Agora
-                </a>
-                <div class="mt-20">
-                    <!-- Imagem Placeholder do Dashboard -->
-                    <div class="bg-gray-800 rounded-2xl p-4 shadow-2xl border border-gray-700 max-w-6xl mx-auto">
-                        <div class="h-8 bg-gray-700 rounded-lg flex items-center px-4">
-                            <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                            <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
-                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                            <span class="ml-4 text-xs text-gray-400">SYNERGY DEV Dashboard - Análise e Automação</span>
+                    <!-- Botões de Navegação -->
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#hero" class="text-gray-300 hover:bg-primary/20 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">Início</a>
+                            <a href="#dashboard-demo" class="text-gray-300 hover:bg-primary/20 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">Dashboard IA</a>
+                            <a href="#pricing" class="text-gray-300 hover:bg-primary/20 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">Preços</a>
+                            <a href="#early-access" class="text-gray-300 hover:bg-accent/20 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">Acesso Antecipado</a>
                         </div>
-                        <div class="h-96 w-full mt-4 bg-gray-900 rounded-xl flex items-center justify-center text-gray-600 text-sm italic">
-                            [Visão geral do Painel de IA em funcionamento: Gráficos de Crescimento, Análise de Público-alvo e sugestões de conteúdo geradas por IA.]
-                        </div>
+                    </div>
+
+                    <!-- Botão de Login (Simulado) -->
+                    <div class="hidden md:block">
+                        <button onclick="showMessage('Login em breve! O foco agora é o Acesso Antecipado.')" class="bg-primary hover:bg-primary/80 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 hover:scale-[1.02]">
+                            Entrar
+                        </button>
+                    </div>
+                    
+                    <!-- Botão Mobile -->
+                    <div class="md:hidden flex items-center">
+                        <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Secção de Onboarding/Input de Dados da Empresa - AGORA COM DADOS COMPLETOS E OPÇÕES DE INTEGRAÇÃO -->
-        <section id="onboarding" class="container mx-auto px-6 py-20 text-center max-w-4xl">
-            <h3 class="text-4xl font-extrabold mb-4 text-white">
-                Início Rápido: Dados para a IA
-            </h3>
-            <p class="text-gray-400 mb-8">
-                Para que a SYNERGY DEV possa gerar o seu plano de vendas e marketing, precisamos de algumas informações essenciais sobre o seu negócio e a sua presença online.
-            </p>
-
-            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700 text-left">
-                <div class="space-y-4">
-                    <!-- Informações Básicas -->
-                    <div>
-                        <label for="company-name" class="block text-sm font-medium text-gray-300 mb-1">Nome da Empresa / Projeto</label>
-                        <input type="text" id="company-name" placeholder="Ex: M&S Mãos à Obra" 
-                               class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                    </div>
-                    <div>
-                        <label for="company-sector" class="block text-sm font-medium text-gray-300 mb-1">Setor de Atuação</label>
-                        <input type="text" id="company-sector" placeholder="Ex: Construção Civil, Desenvolvimento de Software" 
-                               class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                    </div>
-
-                    <!-- Conectividade Digital -->
-                    <h4 class="text-lg font-semibold text-white pt-4 border-t border-gray-700 mt-4">Conectividade Digital e Automação</h4>
-                    
-                    <div>
-                        <label for="website-url" class="block text-sm font-medium text-gray-300 mb-1">Site Principal (URL) - Opcional</label>
-                        <input type="url" id="website-url" placeholder="Ex: https://www.meusite.pt" 
-                               class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                    </div>
-                    <div>
-                        <label for="whatsapp-number" class="block text-sm font-medium text-gray-300 mb-1">Número de WhatsApp (para Automação de Leads)</label>
-                        <input type="tel" id="whatsapp-number" placeholder="Ex: +351 912345678" 
-                               class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                    </div>
-
-                    <div>
-                        <label for="social-media-urls" class="block text-sm font-medium text-gray-300 mb-1">Links de Redes Sociais Existentes (1 por linha) - Opcional</label>
-                        <textarea id="social-media-urls" rows="4" placeholder="Ex:
-https://facebook.com/minhaempresa
-https://instagram.com/minhaempresa
-https://linkedin.com/company/minhaempresa" 
-                                  class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                    </div>
-                    
-                    <!-- Opção de Criação de Redes Sociais (Serviço Adicional) -->
-                    <div class="flex items-start pt-4 border-t border-gray-700">
-                        <input id="create-social-media" type="checkbox" class="mt-1 h-4 w-4 text-purple-600 bg-gray-900 border-gray-700 rounded focus:ring-purple-500">
-                        <label for="create-social-media" class="ml-3 text-sm font-medium text-gray-300">
-                            **Não tenho presença digital completa.** Desejo o serviço de **Criação de Redes Sociais, SEO, Google Ads e Nicho** (Integração Total pela IA).
-                        </label>
-                    </div>
-                    
-                    <!-- Desafio Atual -->
-                    <div class="pt-4">
-                        <label for="current-challenge" class="block text-sm font-medium text-gray-300 mb-1">Principal Desafio de Marketing/Vendas Atual</label>
-                        <textarea id="current-challenge" rows="4" placeholder="Ex: Precisamos de mais leads qualificados na Margem Sul ou o meu software não tem visibilidade no exterior." 
-                                  class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                    </div>
-                </div>
-                
-                <button onclick="startOnboarding()" class="mt-8 w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">
-                    Analisar e Ver Planos
-                </button>
-            </div>
-            <p class="text-xs text-gray-500 mt-4">Os dados são processados pela IA para recomendação e não são guardados nesta demonstração.</p>
-        </section>
-
-
-        <!-- Secção de Preço (Pricing) -->
-        <section id="pricing" class="container mx-auto px-6 py-20 bg-gray-900 rounded-3xl shadow-inner my-16 max-w-6xl">
-            <h3 class="text-4xl font-extrabold text-center mb-12">A Subscrição que Liberta o Seu Tempo</h3>
-
-            <div class="flex justify-center">
-                <div class="bg-gray-800 border-2 border-blue-600 rounded-2xl shadow-xl p-8 max-w-md text-center transform hover:scale-[1.02] transition duration-300">
-                    <p class="text-sm font-semibold text-blue-400 mb-2 uppercase tracking-widest">Plano Profissional</p>
-                    <h4 class="text-5xl font-black text-white mb-4">
-                        <span class="text-2xl align-top text-gray-400">€</span>449
-                        <span class="text-xl font-normal text-gray-400">/ano</span>
-                    </h4>
-                    <p class="text-gray-400 mb-8">Acesso Ilimitado a todas as ferramentas de Marketing e Vendas movidas a IA.</p>
-                    
-                    <ul class="text-left space-y-3 mb-10 text-gray-300">
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Automação Total de Conteúdo & Leads</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Análise Preditiva de Mercado (Nicho/Google Ads)</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Integração Total (Sites, Redes e WhatsApp)</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Suporte Prioritário 24/7</li>
-                    </ul>
-
-                    <button onclick="initiateStripeCheckout(ANNUAL_PRICE_EUROS)" class="w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition duration-300">
-                        Comprar Agora (€449/ano)
+            <!-- Menu Mobile (oculto por padrão) -->
+            <div class="md:hidden hidden" id="mobile-menu">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#hero" class="text-gray-300 hover:bg-primary/20 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition duration-150">Início</a>
+                    <a href="#dashboard-demo" class="text-gray-300 hover:bg-primary/20 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition duration-150">Dashboard IA</a>
+                    <a href="#pricing" class="text-gray-300 hover:bg-primary/20 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition duration-150">Preços</a>
+                    <a href="#early-access" class="text-gray-300 hover:bg-accent/20 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition duration-150">Acesso Antecipado</a>
+                    <button onclick="showMessage('Login em breve! O foco agora é o Acesso Antecipado.')" class="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-2 px-4 rounded-lg shadow-md mt-2 transition duration-200">
+                        Entrar
                     </button>
                 </div>
             </div>
-        </section>
+        </nav>
 
-        <!-- Secção de Acesso Antecipado para Patrocinadores -->
-        <section id="early-access" class="container mx-auto px-6 py-20 text-center max-w-4xl">
-            <h3 class="text-4xl font-extrabold mb-4 text-white">
-                Acesso Antecipado <span class="synergy-gradient">(Patrocinadores)</span>
-            </h3>
-            <p class="text-gray-400 mb-8">
-                É um patrocinador ativo com a modalidade de **€25/mês**? Agradecemos o seu apoio! Insira o seu email de patrocínio para aceder à versão Alpha/Beta do SYNERGY DEV.
-            </p>
-
-            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
-                <input type="email" id="sponsor-email" placeholder="O seu email de Patrocínio (ex: gabriela.felix3960@gmail.com)" 
-                       class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-                       value="felixepessanha@gmail.com"
-                >
-                <button onclick="sponsorLogin()" class="w-full px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition duration-300">
-                    Entrar no Acesso Antecipado
-                </button>
+        <!-- 2. Hero Section (Banner de Fundo Corrigido) -->
+        <header id="hero" class="hero-background min-h-[60vh] flex items-center justify-center py-20 border-b border-secondary/50">
+            <div class="hero-content text-center max-w-4xl px-4">
+                <h1 class="text-5xl sm:text-7xl font-extrabold leading-tight mb-6">
+                    Domine o Mercado com a <span class="gradient-text">Inteligência Artificial</span>
+                </h1>
+                <p class="text-xl text-gray-300 mb-8">
+                    SYNERGY DEV é a plataforma completa de Marketing e Vendas movida a IA, projetada para PMEs e Criadores de Software. Alcance o sucesso sem esforço.
+                </p>
+                <a href="#early-access" class="inline-block bg-accent hover:bg-accent/80 text-white font-extrabold text-lg py-3 px-8 rounded-full shadow-xl transition duration-300 transform hover:scale-[1.05] animate-pulse-glow">
+                    Garantir Acesso Antecipado Beta
+                </a>
             </div>
-        </section>
-
-        <!-- Footer com Informações de Contato -->
-        <footer class="mt-20 border-t border-gray-800 p-6 text-center text-gray-500">
-            <p>&copy; 2025 SYNERGY DEV - Todos os direitos reservados.</p>
-            <p class="mt-2 text-sm">
-                Contacto: <a href="mailto:${CONTACT_EMAIL}" class="hover:text-white">${CONTACT_EMAIL}</a> | Telefone: ${CONTACT_PHONE} (PT)
-            </p>
-        </footer>
-    </div>
-
-
-    <!-- Dashboard de Demonstração (Visível Apenas Após Login/Acesso) -->
-    <div id="app-dashboard" class="hidden min-h-screen p-8">
-        
-        <header class="flex justify-between items-center pb-6 border-b border-gray-700">
-            <!-- Logo no Dashboard -->
-            <!-- Caminho corrigido para assets/SYNERGY DEV.jpg -->
-            <img src="assets/SYNERGY DEV.jpg" onerror="this.onerror=null;this.src='https://placehold.co/150x40/0d1117/fff?text=SYNERGY+DEV+Logo'" alt="SYNERGY DEV Logo" class="h-10">
-            <h2 class="text-4xl font-extrabold synergy-gradient"><span class="text-white text-base font-medium ml-2 border border-blue-500 px-3 py-1 rounded-full">Acesso Alpha</span></h2>
-            <button onclick="logout()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 transform hover:scale-105">
-                Sair / Logout
-            </button>
         </header>
 
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Cartão 1: Análise Preditiva -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
-                <h4 class="text-xl font-bold mb-3 text-blue-400">Análise Preditiva</h4>
-                <p class="text-gray-400 mb-4">A IA previu um aumento de 15% nas vendas para o seu produto Amigo Virtual no próximo trimestre. Foco em anúncios no LinkedIn.</p>
-                <a href="#" class="text-blue-500 hover:text-blue-400 text-sm font-semibold">Ver Relatório Completo &rarr;</a>
-            </div>
+        <!-- 3. Dashboard Demo Section -->
+        <section id="dashboard-demo" class="py-20 bg-dark-bg/50 border-b border-primary/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl font-extrabold text-center mb-12 gradient-text">Dashboard de Marketing Inteligente</h2>
 
-            <!-- Cartão 2: Geração de Conteúdo -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
-                <h4 class="text-xl font-bold mb-3 text-green-400">Geração de Conteúdo</h4>
-                <p class="text-gray-400 mb-4">Geração automática de 5 posts para Twitter e 3 scripts de vídeo otimizados para YouTube. Prontos para publicação.</p>
-                <a href="#" class="text-green-500 hover:text-green-400 text-sm font-semibold">Publicar Conteúdo &rarr;</a>
-            </div>
+                <!-- Tabs de Funcionalidades -->
+                <div class="flex justify-center mb-8 space-x-4">
+                    <button onclick="loadDashboardTab('predictive')" class="tab-button bg-primary text-white font-semibold py-2 px-6 rounded-lg transition duration-200 shadow-lg hover:bg-primary/80">Análise Preditiva</button>
+                    <button onclick="loadDashboardTab('content')" class="tab-button bg-dark-card text-gray-400 font-semibold py-2 px-6 rounded-lg transition duration-200 hover:bg-dark-card/70">Geração de Conteúdo</button>
+                    <button onclick="loadDashboardTab('feedback')" class="tab-button bg-dark-card text-gray-400 font-semibold py-2 px-6 rounded-lg transition duration-200 hover:bg-dark-card/70">Feedback Alpha</button>
+                </div>
 
-            <!-- Cartão 3: Sinergia de Vendas -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
-                <h4 class="text-xl font-bold mb-3 text-purple-400">Sinergia de Vendas</h4>
-                <p class="text-gray-400 mb-4">A plataforma identificou 4 PMEs com perfil de cliente ideal para a sua solução. Contacto automatizado iniciado.</p>
-                <a href="#" class="text-purple-500 hover:text-purple-400 text-sm font-semibold">Monitorizar Leads &rarr;</a>
+                <!-- Conteúdo do Dashboard (Simulado) -->
+                <div id="dashboard-content" class="bg-dark-card p-6 rounded-xl shadow-2xl min-h-[400px] flex items-center justify-center border border-accent/30">
+                    <!-- Placeholder de Loading -->
+                    <div id="loading-spinner" class="flex flex-col items-center justify-center space-y-4">
+                        <div class="dot-flashing"></div>
+                        <p class="text-gray-400">A carregar a simulação do dashboard...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Pricing Section -->
+        <section id="pricing" class="py-20 bg-dark-bg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl font-extrabold text-center mb-16 gradient-text">Planos Simples e Poderosos</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                    <!-- Plano Básico -->
+                    <div class="bg-dark-card p-8 rounded-xl shadow-2xl border border-gray-700 text-center price-card-glow">
+                        <h3 class="text-2xl font-bold text-gray-200 mb-4">Criador</h3>
+                        <p class="text-4xl font-extrabold text-white mb-6">
+                            €49<span class="text-lg font-normal text-gray-400">/mês</span>
+                        </p>
+                        <ul class="space-y-3 text-gray-400 text-left mb-8">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 50 Geração de Conteúdo IA/mês</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Análise de Tendências Básica</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Suporte por Email</li>
+                            <li class="flex items-center text-gray-600"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Sem Análise Preditiva</li>
+                        </ul>
+                        <button onclick="showMessage('Escolha do Plano Criador: Formulário de Pagamento (Simulado).')" class="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md">
+                            Começar
+                        </button>
+                    </div>
+
+                    <!-- Plano Profissional (Destaque) -->
+                    <div class="bg-dark-card p-8 rounded-xl shadow-2xl border-4 border-accent text-center price-card-glow transform scale-[1.05] relative">
+                        <span class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-dark-bg text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">MAIS POPULAR</span>
+                        <h3 class="text-2xl font-bold text-white mb-4">Profissional</h3>
+                        <p class="text-5xl font-extrabold gradient-text mb-6">
+                            €99<span class="text-xl font-normal text-gray-400">/mês</span>
+                        </p>
+                        <ul class="space-y-3 text-gray-300 text-left mb-8">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Geração de Conteúdo IA Ilimitada</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> **Análise Preditiva Completa**</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Integração com CRM</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Suporte Prioritário</li>
+                        </ul>
+                        <button onclick="showMessage('Escolha do Plano Profissional: Formulário de Pagamento (Simulado).')" class="w-full bg-accent hover:bg-accent/80 text-white font-extrabold py-3 rounded-lg transition duration-200 shadow-xl">
+                            Subscrever Agora
+                        </button>
+                    </div>
+
+                    <!-- Plano Empresa -->
+                    <div class="bg-dark-card p-8 rounded-xl shadow-2xl border border-gray-700 text-center price-card-glow">
+                        <h3 class="text-2xl font-bold text-gray-200 mb-4">Empresa</h3>
+                        <p class="text-4xl font-extrabold text-white mb-6">
+                            Personalizado
+                        </p>
+                        <ul class="space-y-3 text-gray-400 text-left mb-8">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Tudo do Plano Profissional</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Utilizadores Múltiplos</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Modelos IA Customizados</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Gestor de Conta Dedicado</li>
+                        </ul>
+                        <button onclick="showMessage('Entre em contacto para um plano Empresa personalizado.')" class="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md">
+                            Falar com Vendas
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Early Access / Checkout Simulation Section -->
+        <section id="early-access" class="py-20 bg-dark-bg/80 border-t border-secondary/50">
+            <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 bg-dark-card p-8 rounded-xl shadow-2xl border border-primary/40">
+                <h2 class="text-3xl font-extrabold text-center mb-6 gradient-text">Junte-se ao Acesso Antecipado</h2>
+                <p class="text-center text-gray-400 mb-8">Registe-se agora para receber acesso imediato à versão Beta, descontos exclusivos no lançamento e o nosso guia IA para PMEs.</p>
+
+                <form id="early-access-form" class="space-y-4">
+                    <!-- Campo Nome da Empresa (Simulado) -->
+                    <div>
+                        <label for="company-name" class="block text-sm font-medium text-gray-300 mb-1">Nome da Empresa/Projeto</label>
+                        <input type="text" id="company-name" name="company-name" placeholder="Ex: SYNERGY DEV Soluções" required class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-accent focus:border-accent transition duration-150">
+                    </div>
+
+                    <!-- Campo Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email Profissional</label>
+                        <input type="email" id="email" name="email" placeholder="seu.email@empresa.pt" required class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-accent focus:border-accent transition duration-150">
+                    </div>
+
+                    <!-- Campo Interesse (Simulado) -->
+                    <div>
+                        <label for="interest" class="block text-sm font-medium text-gray-300 mb-1">Principal Interesse na IA</label>
+                        <select id="interest" name="interest" class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-accent focus:border-accent transition duration-150">
+                            <option value="predictive">Análise Preditiva de Vendas</option>
+                            <option value="content">Geração Automática de Conteúdo</option>
+                            <option value="automation">Automação de Marketing</option>
+                            <option value="other">Outro</option>
+                        </select>
+                    </div>
+
+                    <!-- Checkbox de Termos (Obrigatório) -->
+                    <div class="flex items-center">
+                        <input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-accent bg-gray-700 border-gray-600 rounded focus:ring-accent">
+                        <label for="terms" class="ml-2 block text-sm text-gray-400">
+                            Concordo com os <a href="#" onclick="showMessage('Termos de Serviço: Simulação')" class="text-accent hover:text-accent/80 underline">Termos de Serviço</a>.
+                        </label>
+                    </div>
+
+                    <!-- Botão de Envio (Simulação Stripe Checkout) -->
+                    <button type="submit" class="w-full bg-accent hover:bg-accent/80 text-white font-extrabold py-3 rounded-lg transition duration-200 shadow-xl transform hover:scale-[1.01] flex items-center justify-center space-x-2">
+                        <span>Receber Acesso Beta Agora (Simulação)</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </button>
+                    <p class="text-xs text-center text-gray-500 mt-2">Nenhuma informação de pagamento será processada. Isto é uma simulação de Front-end.</p>
+                </form>
+            </div>
+        </section>
+
+        <!-- 6. Footer -->
+        <footer class="bg-dark-bg/90 border-t border-primary/30 mt-12 py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+                <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-8 mb-4">
+                    <a href="#" class="hover:text-white transition duration-150" onclick="showMessage('Links de Suporte (Simulação)')">Suporte</a>
+                    <a href="#" class="hover:text-white transition duration-150" onclick="showMessage('Links de Privacidade (Simulação)')">Política de Privacidade</a>
+                    <a href="#" class="hover:text-white transition duration-150" onclick="showMessage('Links de Termos (Simulação)')">Termos de Uso</a>
+                </div>
+                <p>&copy; 2025 SYNERGY DEV. Todos os direitos reservados. Projeto Front-end IA.</p>
+            </div>
+        </footer>
+
+
+        <!-- 7. Modal de Mensagem Personalizada (Em vez de Alert) -->
+        <div id="message-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-[100] items-center justify-center">
+            <div class="bg-dark-card p-6 rounded-xl shadow-2xl max-w-sm w-full border border-accent/50 transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+                <h3 class="text-xl font-bold gradient-text mb-4">Aviso SYNERGY DEV</h3>
+                <p id="modal-text" class="text-gray-300 mb-6"></p>
+                <button onclick="hideMessage()" class="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-2 rounded-lg transition duration-200">
+                    Fechar
+                </button>
             </div>
         </div>
-
-        <div class="mt-12 bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
-            <h4 class="text-2xl font-bold mb-4 text-white">Feedback e Testes Alpha</h4>
-            <p class="text-gray-400">Obrigado por ser um patrocinador e testador Alpha! Envie o seu feedback de erros ou sugestões para o nosso canal exclusivo no Discord ou para <span id="dashboard-contact-email"></span>.</p>
-        </div>
-
     </div>
 
+    <!-- Script JavaScript -->
+    <script>
+        // Variável de estado para o dashboard
+        let currentDashboardTab = 'predictive';
+
+        // --- Funções de UI ---
+
+        // 1. Mostrar Modal de Mensagem (substitui alert())
+        function showMessage(text) {
+            const modal = document.getElementById('message-modal');
+            const content = document.getElementById('modal-content');
+            document.getElementById('modal-text').textContent = text;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            // Animação de entrada
+            setTimeout(() => {
+                content.classList.remove('opacity-0', 'scale-95');
+                content.classList.add('opacity-100', 'scale-100');
+            }, 10);
+        }
+
+        // 2. Esconder Modal de Mensagem
+        function hideMessage() {
+            const modal = document.getElementById('message-modal');
+            const content = document.getElementById('modal-content');
+            // Animação de saída
+            content.classList.remove('opacity-100', 'scale-100');
+            content.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // 3. Toggle Menu Mobile
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+            mobileMenu.classList.toggle('hidden');
+            this.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        // 4. Carregar o conteúdo do Dashboard com simulação de delay
+        function loadDashboardTab(tabName) {
+            currentDashboardTab = tabName;
+            const contentDiv = document.getElementById('dashboard-content');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            
+            // Ativar loading
+            contentDiv.innerHTML = `<div id="loading-spinner" class="flex flex-col items-center justify-center space-y-4"><div class="dot-flashing"></div><p class="text-gray-400">A carregar a simulação do dashboard...</p></div>`;
+
+            // Atualizar o estado dos botões (cores)
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.onclick.toString().includes(tabName)) {
+                    btn.classList.remove('bg-dark-card', 'text-gray-400', 'hover:bg-dark-card/70');
+                    btn.classList.add('bg-primary', 'text-white', 'shadow-lg', 'hover:bg-primary/80');
+                } else {
+                    btn.classList.add('bg-dark-card', 'text-gray-400', 'hover:bg-dark-card/70');
+                    btn.classList.remove('bg-primary', 'text-white', 'shadow-lg', 'hover:bg-primary/80');
+                }
+            });
+
+            // Simulação de delay de carregamento
+            setTimeout(() => {
+                contentDiv.innerHTML = generateDashboardContent(tabName);
+            }, 1000); // 1 segundo de delay
+        }
+
+        // 5. Gerar o HTML do Dashboard (Conteúdo simulado)
+        function generateDashboardContent(tab) {
+            switch (tab) {
+                case 'predictive':
+                    return `
+                        <div class="w-full">
+                            <h3 class="text-2xl font-bold gradient-text mb-4">Análise Preditiva de Vendas (Simulação)</h3>
+                            <p class="text-gray-400 mb-6">A nossa IA prevê que o seu Produto A terá um aumento de <strong>22% nas vendas</strong> no próximo trimestre, focando-se no mercado Europeu. O risco de falha do Produto B é de 15% devido à saturação. Recomendação: Mudar 70% do orçamento de publicidade do Produto B para o Produto A.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                <div class="bg-dark-bg p-4 rounded-lg border border-primary/50">
+                                    <p class="text-4xl font-extrabold text-green-400">+22%</p>
+                                    <p class="text-gray-400 text-sm">Crescimento Previsto (Produto A)</p>
+                                </div>
+                                <div class="bg-dark-bg p-4 rounded-lg border border-primary/50">
+                                    <p class="text-4xl font-extrabold text-yellow-400">85%</p>
+                                    <p class="text-gray-400 text-sm">Probabilidade de Sucesso (Geral)</p>
+                                </div>
+                                <div class="bg-dark-bg p-4 rounded-lg border border-primary/50">
+                                    <p class="text-4xl font-extrabold text-red-400">70%</p>
+                                    <p class="text-gray-400 text-sm">Orçamento a Reposicionar</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                case 'content':
+                    return `
+                        <div class="w-full">
+                            <h3 class="text-2xl font-bold gradient-text mb-4">Geração de Conteúdo Automático (Simulação)</h3>
+                            <p class="text-gray-400 mb-6">Geramos automaticamente um artigo de blogue focado no tópico "Automação via IA". O Score de SEO é de 95/100. Pode copiar e publicar diretamente.</p>
+                            <div class="bg-dark-bg p-4 rounded-lg border border-primary/50 h-64 overflow-y-auto">
+                                <h4 class="text-xl font-semibold text-white mb-2">Título Sugerido:</h4>
+                                <p class="text-accent mb-4">"O Fim do Trabalho Manual: Como a IA Está a Redefinir a Automação de Marketing para PMEs"</p>
+                                <p class="text-gray-400 text-sm italic">
+                                    A automação de marketing evoluiu de uma ferramenta de conveniência para um motor estratégico. No coração desta revolução está a Inteligência Artificial, que não só executa tarefas repetitivas como também otimiza a tomada de decisões em tempo real. Para uma PME, isto significa campanhas mais eficientes, menor custo de aquisição de cliente (CAC) e uma presença online que compete com grandes empresas. A SYNERGY DEV utiliza modelos avançados para criar conteúdo que ressoa com o seu público-alvo... [Conteúdo Completo Disponível no Plano Profissional]
+                                </p>
+                            </div>
+                            <button class="mt-4 bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                                Copiar Texto
+                            </button>
+                        </div>
+                    `;
+                case 'feedback':
+                    return `
+                        <div class="w-full">
+                            <h3 class="text-2xl font-bold gradient-text mb-4">Feedback Alpha & Roadmap (Versão 0.9.1)</h3>
+                            <p class="text-gray-400 mb-6">Bem-vindo à fase Alpha! Por favor, utilize este espaço para reportar bugs, sugerir funcionalidades ou deixar feedback geral sobre a plataforma. O seu input é vital.</p>
+                            <ul class="space-y-3 text-gray-400 text-left">
+                                <li class="flex items-start bg-dark-bg p-3 rounded-lg border border-primary/50">
+                                    <span class="text-green-400 font-bold mr-3">✔</span>
+                                    <p>Nova Funcionalidade: Integração inicial de dados de campanhas sociais. (Status: Lançado)</p>
+                                </li>
+                                <li class="flex items-start bg-dark-bg p-3 rounded-lg border border-primary/50">
+                                    <span class="text-yellow-400 font-bold mr-3">🐛</span>
+                                    <p>Bug Conhecido: O painel de conversão pode falhar ao carregar dados históricos. (Status: Em Correção)</p>
+                                </li>
+                                <li class="flex items-start bg-dark-bg p-3 rounded-lg border border-primary/50">
+                                    <span class="text-accent font-bold mr-3">💡</span>
+                                    <p>Próxima Feature: Criação de testes A/B automáticos via IA. (Status: Em Desenvolvimento)</p>
+                                </li>
+                            </ul>
+                            <button class="mt-4 bg-primary hover:bg-primary/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                                Enviar Feedback
+                            </button>
+                        </div>
+                    `;
+                default:
+                    return `<p class="text-gray-400">Selecione uma aba para ver a demonstração do dashboard.</p>`;
+            }
+        }
+        
+        // 6. Submissão do Formulário de Acesso Antecipado (Simulado)
+        document.getElementById('early-access-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const company = document.getElementById('company-name').value;
+            showMessage(`Obrigado, ${company}! O seu pedido de Acesso Antecipado foi recebido (Simulação). Em breve receberá um email com a sua chave Beta.`);
+            this.reset(); // Limpa o formulário após a simulação
+        });
+
+
+        // --- Inicialização ---
+
+        // Carregar a aba inicial do Dashboard ao carregar a página
+        window.onload = function() {
+            loadDashboardTab('predictive');
+        };
+    </script>
 </body>
 </html>
